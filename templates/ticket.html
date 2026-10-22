@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Your Ticket{% endblock %}
+{% block content %}
+<div class="ticket-page">
+  <a class="back-link" href="{{ url_for('index') }}">← Back to customer portal</a>
+  <section class="ticket-result panel">
+    <div class="success-check">✓</div><span class="eyebrow dark">YOU'RE IN THE QUEUE</span>
+    <h1>Your ticket is ready.</h1><p class="ticket-intro">Keep this page open and watch your queue status.</p>
+    <div class="large-ticket">
+      <div class="ticket-cap">QUEUE NUMBER</div><div class="large-ticket-number">{{ item.ticket_no }}</div>
+      <div class="ticket-separator"><span></span><span></span></div>
+      <div class="ticket-detail-grid"><div><small>NAME</small><strong>{{ item.customer_name }}</strong></div><div><small>SERVICE</small><strong>{{ item.service }}</strong></div></div>
+    </div>
+    <div class="ticket-estimates">
+      <div><span class="estimate-icon">♙</span><div><small>People ahead</small><strong id="ahead-count">{{ ahead }}</strong></div></div>
+      <div><span class="estimate-icon">◷</span><div><small>Estimated wait</small><strong id="wait-time">~{{ wait_minutes }} min</strong></div></div>
+    </div>
+    <div class="ticket-status"><span class="status-pill {{ item.status|lower }}">{{ item.status }}</span><span id="ticket-status-text">{% if item.status == 'Serving' %}Please proceed to the counter.{% elif item.status == 'Served' %}Your ticket has been completed.{% elif item.status == 'Cancelled' %}This ticket was cancelled.{% else %}We'll update your position as the queue moves.{% endif %}</span></div>
+    <a class="button button-primary button-full" href="{{ url_for('index') }}">Return to home</a>
+  </section>
+</div>
+<script>
+  window.ticketId = {{ item.id }};
+  window.ticketServiceMinutes = {{ {'General Enquiry':5,'Payments':7,'Customer Support':10,'Document Verification':8}.get(item.service, 5) }};
+</script>
+{% endblock %}

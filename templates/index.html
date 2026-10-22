@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Customer Portal{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow"><span class="pulse"></span> LESS WAITING, MORE DOING</div>
+    <h1>Your time matters.<br><span>Join the queue online.</span></h1>
+    <p>Take a digital ticket before you reach the counter. Track your place in line and plan your visit with confidence.</p>
+    <a class="button button-light" href="#join">Get a queue ticket <span>↗</span></a>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+    <div class="ticket-illustration"><div class="ticket-top">YOUR QUEUE NUMBER</div><div class="ticket-number">Q<span>024</span></div><div class="ticket-divider"></div><div class="ticket-bottom"><span>EST. WAIT</span><strong>~10 min</strong></div></div>
+    <div class="floating-chip chip-one">✓ Digital ticket</div><div class="floating-chip chip-two">↗ Live queue</div>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card"><span class="stat-icon purple">◷</span><div><span class="stat-label">People waiting</span><strong>{{ stats.waiting }}</strong><small>In the active queue</small></div></article>
+  <article class="stat-card"><span class="stat-icon green">↗</span><div><span class="stat-label">Being served</span><strong>{{ stats.serving }}</strong><small>At the service counter</small></div></article>
+  <article class="stat-card"><span class="stat-icon orange">✓</span><div><span class="stat-label">Served today</span><strong>{{ stats.served_today }}</strong><small>Completed visits</small></div></article>
+</section>
+
+<section class="content-grid" id="join">
+  <div class="panel join-panel">
+    <div class="section-heading"><div><span class="eyebrow dark">START HERE</span><h2>Join the queue</h2><p>It only takes a few seconds.</p></div><span class="step-bubble">01</span></div>
+    <form action="{{ url_for('join_queue') }}" method="post" class="join-form">
+      <label for="customer_name">Your name</label>
+      <input id="customer_name" name="customer_name" placeholder="e.g. Mahalakshmi" maxlength="80" required>
+      <label for="service">Choose a service</label>
+      <div class="service-options">
+        {% for service, minutes in services.items() %}
+        <label class="service-option">
+          <input type="radio" name="service" value="{{ service }}" {% if loop.first %}checked{% endif %} required>
+          <span class="service-check"></span>
+          <span class="service-copy"><strong>{{ service }}</strong><small>~{{ minutes }} min per customer</small></span>
+          <span class="service-arrow">›</span>
+        </label>
+        {% endfor %}
+      </div>
+      <button class="button button-primary button-full" type="submit">Generate my ticket <span>→</span></button>
+      <p class="privacy-note">Demo mode: use a first name or nickname. No account required.</p>
+    </form>
+  </div>
+  <div class="panel queue-panel">
+    <div class="section-heading"><div><span class="eyebrow dark">LIVE OVERVIEW</span><h2>Current queue</h2><p>Updated when you refresh.</p></div><span class="live-label"><i></i> LIVE</span></div>
+    {% if queue %}
+    <div class="queue-list">
+      {% for item in queue %}
+      <div class="queue-row">
+        <div class="queue-ticket">{{ item.ticket_no.split('-')[-1] }}</div>
+        <div class="queue-person"><strong>{{ item.customer_name }}</strong><small>{{ item.service }}</small></div>
+        {% if item.status == 'Serving' %}<span class="status-pill serving">Serving now</span>{% else %}<span class="status-pill waiting">Waiting</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">◷</div><strong>The queue is clear</strong><p>Be the first to join today.</p></div>
+    {% endif %}
+    <div class="queue-footer"><span><span class="tiny-dot"></span> Queue activity</span><a href="{{ url_for('admin') }}">Staff view ↗</a></div>
+  </div>
+</section>
+
+<section class="bottom-note"><div class="note-icon">✦</div><div><strong>How it works</strong><p>Choose a service, get your ticket number, and keep an eye on the queue. Staff can call the next customer from the dashboard.</p></div><div class="note-steps"><span><b>1</b> Join</span><span><b>2</b> Track</span><span><b>3</b> Get served</span></div></section>
+{% endblock %}

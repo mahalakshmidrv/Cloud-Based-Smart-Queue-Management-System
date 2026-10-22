@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block content %}
+<section class="admin-hero"><div><span class="eyebrow dark">OPERATIONS CENTER</span><h1>Staff dashboard</h1><p>Manage the active line and keep service moving smoothly.</p></div><div class="admin-date"><span class="calendar-icon">▦</span><div><strong>Queue overview</strong><small>Local demo dashboard</small></div></div></section>
+<section class="stats-grid admin-stats">
+  <article class="stat-card"><span class="stat-icon purple">◷</span><div><span class="stat-label">Waiting</span><strong>{{ stats.waiting }}</strong><small>Customers in line</small></div></article>
+  <article class="stat-card"><span class="stat-icon blue">➜</span><div><span class="stat-label">Serving now</span><strong>{{ stats.serving }}</strong><small>Active service</small></div></article>
+  <article class="stat-card"><span class="stat-icon green">✓</span><div><span class="stat-label">Served today</span><strong>{{ stats.served_today }}</strong><small>Completed tickets</small></div></article>
+  <article class="stat-card"><span class="stat-icon orange">▤</span><div><span class="stat-label">Joined today</span><strong>{{ stats.total_today }}</strong><small>Tickets created</small></div></article>
+</section>
+<section class="admin-grid">
+  <div class="panel">
+    <div class="section-heading"><div><span class="eyebrow dark">LIVE QUEUE</span><h2>Customers in line</h2><p>Call the next ticket when you're ready.</p></div><span class="live-label"><i></i> ACTIVE</span></div>
+    <form action="{{ url_for('call_next') }}" method="post" class="call-next-form"><button class="button button-primary" type="submit">▶ Call next customer</button><span>Current serving ticket is marked served automatically.</span></form>
+    {% if queue %}
+    <div class="table-wrap"><table><thead><tr><th>Ticket</th><th>Customer</th><th>Service</th><th>Status</th><th>Action</th></tr></thead><tbody>
+      {% for item in queue %}
+      <tr><td><strong class="ticket-code">{{ item.ticket_no }}</strong></td><td>{{ item.customer_name }}</td><td>{{ item.service }}</td><td><span class="status-pill {{ item.status|lower }}">{{ item.status }}</span></td><td class="action-cell">
+      <form action="{{ url_for('serve_ticket', ticket_id=item.id) }}" method="post"><button class="text-action" type="submit">Serve</button></form>
+      <form action="{{ url_for('cancel_ticket', ticket_id=item.id) }}" method="post" data-confirm="Cancel this ticket?"><button class="text-action danger-text" type="submit">Cancel</button></form></td></tr>
+      {% endfor %}
+    </tbody></table></div>
+    {% else %}<div class="empty-state compact"><div class="empty-icon">✓</div><strong>No active tickets</strong><p>The queue is empty right now.</p></div>{% endif %}
+  </div>
+  <div class="panel history-panel">
+    <div class="section-heading"><div><span class="eyebrow dark">RECENT ACTIVITY</span><h2>Ticket history</h2><p>Latest 30 tickets.</p></div></div>
+    {% if history %}
+    <div class="history-list">{% for item in history %}<div class="history-row"><div class="history-icon {% if item.status == 'Served' %}history-done{% elif item.status == 'Cancelled' %}history-cancel{% else %}history-wait{% endif %}">{% if item.status == 'Served' %}✓{% elif item.status == 'Cancelled' %}×{% else %}◷{% endif %}</div><div class="history-copy"><strong>{{ item.ticket_no }}</strong><small>{{ item.customer_name }} · {{ item.service }}</small></div><span class="history-status">{{ item.status }}</span></div>{% endfor %}</div>
+    {% else %}<div class="empty-state compact"><p>No tickets have been created yet.</p></div>{% endif %}
+    <form action="{{ url_for('reset_queue') }}" method="post" class="reset-form" data-confirm="This permanently clears all local queue history. Continue?">
+      <label for="confirmation">Reset demo data</label><div class="reset-row"><input id="confirmation" name="confirmation" placeholder="Type RESET" required><button class="button button-danger" type="submit">Clear</button></div>
+      <small>Use only when you want to clear all tickets from this demo database.</small>
+    </form>
+  </div>
+</section>
+{% endblock %}
